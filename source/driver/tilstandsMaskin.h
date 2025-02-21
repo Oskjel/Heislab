@@ -1,88 +1,66 @@
-#pragma once
-#include <unistd.h> //sleep(3) for å vente i 3 sekunder
-#include <elevio.h>
-#include <con_load.h>
 
+#include <unistd.h> //sleep(3) for å vente i 3 sekunder
+#include "elevio.h"
+#include "con_load.h"
+
+typedef enum {
+    OPEN = 1,
+    CLOSE = 0
+} DOOR;
+
+typedef enum {
+    ON = 1,
+    OFF = 0
+} BUTTON;
 
 typedef struct {
+    int floorState;
+    int queueButtonType[20];
+    int queueFloor[20];
+    int motorDirection;
+    int doorState;
+    int stopButton;
+    int obstruction;
+} tilstandsMaskin;
+
+void initialize_tilstandsMaskin() {
+    tilstandsMaskin.floorState = elevio_floorSensor();
+    for (int i = 0; i < 20; i++) {
+        tilstandsMaskin.queueButtonType[i] = 0;  // Initialize to default value
+        tilstandsMaskin.queueFloor[i] = 0;      // Initialize to default value
+    }
+    tilstandsMaskin.motorDirection = MotorDirection::DIRN_STOP;
+    tilstandsMaskin.doorState = DOOR::CLOSE;
+    tilstandsMaskin.stopButton = BUTTON::OFF;
+    tilstandsMaskin.obstruction = BUTTON::OFF;
+}
+
+
+/*
+static struct {
     int floorState = elevio_floorSensor();
     int queueButtonType[20] = {};
     int queueFloor[20] = {};
-    int motorDirection{0};
-    int doorState{0};
-    int elevatorMoving{0};
-    int stopButton{0};
-    int obstruction{0};
+    int motorDirection{MotorDirection::DIRN_STOP};
+    int doorState{DOOR::CLOSE};
+    int stopButton{BUTTON::OFF};
+    int obstruction{BUTTON::OFF};
     
 
 } tilstandsMaskin;
-
-void addOrder(tilstandsMaskin* tilstand, int floor, ButtonType button){
-
-    for(int i = 0; i < 19; i++){ 
-        if(tilstand->queueButtonType[i] ==-1){
-            tilstand->queueButtonType[i] = button;
-            tilstand->queueFloor[i] = floor;
-            break;
-        } else {
-            printf("Queue is full"); // Maa lage en funksjon som stopper heisen og gir beskjed om at køen er full
-            
-            
-        }
-    }
-}
-
-void removeOrder(tilstandsMaskin* tilstand){
-    
-    for(int i = 0; i < 19; i++){
-        tilstand->queueButtonType[i] = tilstand->queueButtonType[i+1]; //Flytter alle elementene en plass frem
-        tilstand->queueFloor[i] = tilstand->queueFloor[i+1];
-        if (tilstand->queueButtonType[i] == -1){
-            tilstand->queueButtonType[i] = -1; //Tømmer siste element
-            tilstand->queueFloor[i] = -1;
-            break;
-        }
-    }
-    
-}
-void cleanQueue(tilstandsMaskin* tilstand){
-    for(int i = 0; i < 20; i++){
-        tilstand->queueButtonType[i] = -1;
-        tilstand->queueFloor[i] = -1;
-    }
-}
-
-void buttonPushed(tilstandsMaskin* tilstand){ //Itererer gjennom alle knappene og legger til ordre hvis de er trykket på
-    for(int i = 0; i < N_FLOORS; i++){
-        for(int j = 0; j < 3; j++){
-            if(elevio_getButtonSignal(i, j)){
-                addOrder(tilstand, i, j);
-            }
-        }
-    }
-}
-
-/*
-void executeOrder (tilstandsMaskin* tilstand){
-    if(tilstand->queue[tilstand->floorState] == BUTTON_CAB){
-        elevio_doorOpenLamp(1);
-        sleep(3);
-        elevio_doorOpenLamp(0);
-        removeOrder(tilstand, tilstand->floorState);
-    }
-    else if(tilstand->queue[tilstand->floorState] == BUTTON_HALL_UP){
-        elevio_motorDirection(DIRN_UP);
-        elevio_buttonLamp(tilstand->floorState, BUTTON_HALL_UP, 1);
-        sleep(3);
-        elevio_buttonLamp(tilstand->floorState, BUTTON_HALL_UP, 0);
-        removeOrder(tilstand, tilstand->floorState);
-    }
-    else if(tilstand->queue[tilstand->floorState] == BUTTON_HALL_DOWN){
-        elevio_motorDirection(DIRN_DOWN);
-        elevio_buttonLamp(tilstand->floorState, BUTTON_HALL_DOWN, 1);
-        sleep(3);
-        elevio_buttonLamp(tilstand->floorState, BUTTON_HALL_DOWN, 0);
-        removeOrder(tilstand, tilstand->floorState);
-    }
-}
 */
+
+void executeOrder (tilstandsMaskin* tilstand); //Utfører ordre
+
+void addOrder(tilstandsMaskin* tilstand, int floor, ButtonType button); //Legger til ordre i køen
+
+void removeOrder(tilstandsMaskin* tilstand); //Fjerner ordre fra køen
+
+void cleanQueue(tilstandsMaskin* tilstand); //Tømmer hele køen
+
+void buttonPushed(tilstandsMaskin* tilstand); //Itererer gjennom alle knappene og legger til ordre hvis de er trykket på
+
+void doorOpen(tilstandsMaskin* tilstand); //Åpner døren og venter i 3 sekunder, endrer intern tilstand til åpen og lukket + lys
+
+void etasjePanel(tilstandsMaskin* tilstand); //tenn etasjelysene på etasjepanelet
+
