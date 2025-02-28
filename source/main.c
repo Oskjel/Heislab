@@ -4,18 +4,33 @@
 #include <time.h>
 #include "driver/elevio.h"
 #include "driver/tilstandsMaskin.h"
+#include "driver/helpful_func.h"
 
 
 
 int main(){
     elevio_init();
+    tilstandsMaskin TM;
+    tilstandsMaskin * pTM = &TM;
+    initialize_tilstandsMaskin(pTM);
     
     printf("=== Example Program ===\n");
     printf("Press the stop button on the elevator panel to exit\n");
 
-    elevio_motorDirection(DIRN_UP);
-    //tilstandsMaskin* tilstand = new tilstandsMaskin();
 
+    while(!elevio_stopButton()){
+        stateRefresh(pTM);
+        buttonPushed(pTM); // Itererer gjennom alle knapper og legger til order dersom kanpp trykkes
+        
+        
+       
+        
+    }
+    
+   printf("Obs: %d | Stop: %d | Floor: %d\n", pTM->obstruction, pTM->stopButton, pTM->floorState);
+    
+    //tilstandsMaskin* tilstand = new tilstandsMaskin();
+/*
     while(1){
         //tilstand->etasjePanel();
         int floor = elevio_floorSensor();
@@ -40,7 +55,7 @@ int main(){
 
         if(elevio_obstruction()){
             elevio_stopLamp(1);elevio_motorDirection(DIRN_UP);
-    tilstandsMaskin* tilstand = new tilstandsMaskin();
+    tilstandsMaskin* tilstand = &tilstandsMaskin();
         } else {
             elevio_stopLamp(0);
         }
@@ -52,6 +67,8 @@ int main(){
         //husk å frigjør minne etter heisobjekt
         nanosleep(&(struct timespec){0, 20*1000*1000}, NULL);
     }
+    */
+
     //free(tilstand);
 
     return 0;
