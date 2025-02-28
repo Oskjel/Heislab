@@ -86,6 +86,7 @@ void executeOrder (tilstandsMaskin* tilstand) {
 
 
 void doorOpen(tilstandsMaskin* tilstand){
+    
     elevio_doorOpenLamp(1);
     tilstand->doorState = OPEN;
     sleep(3);

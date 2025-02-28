@@ -5,6 +5,7 @@
 #include "driver/elevio.h"
 #include "driver/tilstandsMaskin.h"
 #include "driver/helpful_func.h"
+#include "driver/safety.h"
 
 
 
@@ -20,11 +21,14 @@ int main(){
 
     while(!elevio_stopButton()){
         stateRefresh(pTM);
+
+        if(pTM->stopButton){
+            stopBtnPressed(pTM);
+        }
+
         buttonPushed(pTM); // Itererer gjennom alle knapper og legger til order dersom kanpp trykkes
-        
-        
-       
-        
+              
+               
     }
     
    printf("Obs: %d | Stop: %d | Floor: %d\n", pTM->obstruction, pTM->stopButton, pTM->floorState);
