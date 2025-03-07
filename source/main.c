@@ -8,19 +8,20 @@
 
 
 
+
 int main(){
     elevio_init();
-    tilstandsMaskin TM;
-    initialize_tilstandsMaskin(TM);
+    
+    initialize_tilstandsMaskin();
     
     printf("=== Example Program ===\n");
     printf("Press the stop button on the elevator panel to exit\n");
 
 
     while(!elevio_stopButton()){
-        stateRefresh(TM);
-        buttonPushed(TM); // Itererer gjennom alle knapper og legger til order dersom kanpp trykkes
-        executeOrder(TM);
+        stateRefresh();
+        buttonPushed(); // Itererer gjennom alle knapper og legger til order dersom kanpp trykkes
+        executeOrder();
     }
 
 

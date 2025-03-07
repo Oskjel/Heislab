@@ -23,23 +23,25 @@ typedef struct {
     int obstruction;
 } tilstandsMaskin;
 
-tilstandsMaskin initialize_tilstandsMaskin(tilstandsMaskin    pTM);
+tilstandsMaskin TM;
 
-tilstandsMaskin executeOrder (tilstandsMaskin   tilstand); //Utfører ordre 
+void initialize_tilstandsMaskin();
 
-tilstandsMaskin addOrder(tilstandsMaskin   tilstand, int floor, ButtonType button); //Legger til ordre i køen [check]
+void executeOrder (); //Utfører ordre 
 
-tilstandsMaskin cleanFloor(tilstandsMaskin   tilstand);
+void addOrder(int floor, ButtonType button); //Legger til ordre i køen [check]
 
-tilstandsMaskin removeOrder(tilstandsMaskin   tilstand,int floor, ButtonType button); //Fjerner ordre fra køen [check]
+void cleanFloor();
 
-tilstandsMaskin cleanQueue(tilstandsMaskin   tilstand); //Tømmer hele køen [check]
+void removeOrder(int floor, ButtonType button); //Fjerner ordre fra køen [check]
 
-void buttonPushed(tilstandsMaskin   tilstand); //Itererer gjennom alle knappene og legger til ordre hvis de er trykket på
+void cleanQueue(); //Tømmer hele køen [check]
 
-tilstandsMaskin doorOpen(tilstandsMaskin   tilstand); //Åpner døren og venter i 3 sekunder, endrer intern tilstand til åpen og lukket + lys
+void buttonPushed(); //Itererer gjennom alle knappene og legger til ordre hvis de er trykket på
+
+void doorOpen(); //Åpner døren og venter i 3 sekunder, endrer intern tilstand til åpen og lukket + lys
 
 
-tilstandsMaskin stateRefresh(tilstandsMaskin   tilstand);
+void stateRefresh();
 
-int orderFloor(tilstandsMaskin   tilstand, int floor);
+int orderFloor(int floor);
