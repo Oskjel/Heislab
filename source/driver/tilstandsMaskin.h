@@ -23,24 +23,23 @@ typedef struct {
     int obstruction;
 } tilstandsMaskin;
 
-void initialize_tilstandsMaskin(tilstandsMaskin * pTM);
+tilstandsMaskin initialize_tilstandsMaskin(tilstandsMaskin    pTM);
 
-void executeOrder (tilstandsMaskin* tilstand); //Utfører ordre 
+tilstandsMaskin executeOrder (tilstandsMaskin   tilstand); //Utfører ordre 
 
-void addOrder(tilstandsMaskin* tilstand, int floor, ButtonType button); //Legger til ordre i køen [check]
+tilstandsMaskin addOrder(tilstandsMaskin   tilstand, int floor, ButtonType button); //Legger til ordre i køen [check]
 
-void cleanFloor(tilstandsMaskin* tilstand);
+tilstandsMaskin cleanFloor(tilstandsMaskin   tilstand);
 
-void removeOrder(tilstandsMaskin* tilstand,int floor, ButtonType button); //Fjerner ordre fra køen [check]
+tilstandsMaskin removeOrder(tilstandsMaskin   tilstand,int floor, ButtonType button); //Fjerner ordre fra køen [check]
 
-void cleanQueue(tilstandsMaskin* tilstand); //Tømmer hele køen [check]
+tilstandsMaskin cleanQueue(tilstandsMaskin   tilstand); //Tømmer hele køen [check]
 
-void buttonPushed(tilstandsMaskin* tilstand); //Itererer gjennom alle knappene og legger til ordre hvis de er trykket på
+void buttonPushed(tilstandsMaskin   tilstand); //Itererer gjennom alle knappene og legger til ordre hvis de er trykket på
 
-void doorOpen(tilstandsMaskin* tilstand); //Åpner døren og venter i 3 sekunder, endrer intern tilstand til åpen og lukket + lys
+tilstandsMaskin doorOpen(tilstandsMaskin   tilstand); //Åpner døren og venter i 3 sekunder, endrer intern tilstand til åpen og lukket + lys
 
-void etasjePanel(tilstandsMaskin* tilstand); //tenn etasjelysene på etasjepanelet
 
-void stateRefresh(tilstandsMaskin* tilstand);
+tilstandsMaskin stateRefresh(tilstandsMaskin   tilstand);
 
-void nextOrder(tilstandsMaskin* tilstand);
+int orderFloor(tilstandsMaskin   tilstand, int floor);

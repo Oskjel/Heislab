@@ -11,23 +11,21 @@
 int main(){
     elevio_init();
     tilstandsMaskin TM;
-    tilstandsMaskin * pTM = &TM;
-    initialize_tilstandsMaskin(pTM);
+    initialize_tilstandsMaskin(TM);
     
     printf("=== Example Program ===\n");
     printf("Press the stop button on the elevator panel to exit\n");
 
 
     while(!elevio_stopButton()){
-        stateRefresh(pTM);
-        buttonPushed(pTM); // Itererer gjennom alle knapper og legger til order dersom kanpp trykkes
-        executeOrder(pTM);
-        
-       
-        
+        stateRefresh(TM);
+        buttonPushed(TM); // Itererer gjennom alle knapper og legger til order dersom kanpp trykkes
+        executeOrder(TM);
     }
+
+
     
-   printf("Obs: %d | Stop: %d | Floor: %d\n", pTM->obstruction, pTM->stopButton, pTM->floorState);
+   
     
     //tilstandsMaskin* tilstand = new tilstandsMaskin();
 /*
