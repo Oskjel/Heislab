@@ -2,112 +2,127 @@
 #include "tilstandsMaskin.h"
 
 
-void initialize_tilstandsMaskin(tilstandsMaskin * pTM) {
+void initialize_tilstandsMaskin() {
     while (elevio_floorSensor()==-1)
     {
         elevio_motorDirection(DIRN_DOWN);
     }
-    pTM->floorState = elevio_floorSensor();
-    for(int i = 0; i < 20; i++){
-        pTM->queueButtonType[i] = -1;
-        pTM->queueFloor[i] = -1;
+    elevio_motorDirection(DIRN_STOP);
+
+    TM .floorState = elevio_floorSensor();
+     for (int i = 0; i < 4; i++) {
+        for (int j =0; j < 3; j++) {
+            TM .queue[i][j]=0;
+        }
     }
-    pTM->motorDirection = DIRN_STOP;
-    pTM->doorState = CLOSE;
-    pTM->stopButton = OFF;
-    pTM->obstruction = OFF;
+
+    TM .motorDirection = DIRN_STOP;
+    TM .doorState = CLOSE;
+    TM .stopButton = OFF;
+    TM .obstruction = OFF;
+    
 }
 
-void addOrder(tilstandsMaskin* tilstand, int floor, ButtonType button){
-
-    for(int i = 0; i < 20; i++){ 
+void addOrder( int floor, ButtonType button){
+        TM .queue[floor][button] = 1;
         
-        if(tilstand->queueButtonType[i] ==-1){
-        
-            tilstand->queueButtonType[i] = button;
-            tilstand->queueFloor[i] = floor;
-            break;
-        } else {
-            if(tilstand->queueFloor[i] == floor && tilstand->queueButtonType[i]==button) { // Legger ikke til eksisterende order
-                break;
-            }
-        }           
-}
 };
 
-void removeOrder(tilstandsMaskin* tilstand){
+void removeOrder(int floor, ButtonType button){
+    TM .queue[floor][button] = 0;
     
-    for(int i = 0; i < 20; i++){
-        tilstand->queueButtonType[i] = tilstand->queueButtonType[i+1]; //Flytter alle elementene en plass frem
-        tilstand->queueFloor[i] = tilstand->queueFloor[i+1];
-        if (tilstand->queueButtonType[i] == -1){
-            tilstand->queueButtonType[i] = -1; //Tømmer siste element
-            tilstand->queueFloor[i] = -1;
-            break;
+    
+};
+  void cleanQueue(){
+    for (int i = 0; i < 4; i++) {
+        for (int j =0; j < 3; j++) {
+            TM .queue[i][j]=0;
         }
     }
     
 };
-void cleanQueue(tilstandsMaskin* tilstand){
-    for(int i = 0; i < 20; i++){
-        tilstand->queueButtonType[i] = -1;
-        tilstand->queueFloor[i] = -1;
-    }
+  void cleanFloor(){
+    
+        for (int j =0; j < 3; j++) {
+            TM .queue[TM .floorState][j]=0;
+        }
+    
 };
 
-void buttonPushed(tilstandsMaskin* tilstand){ //Itererer gjennom alle knappene og legger til ordre hvis de er trykket på
-    for(int f = 0; f < N_FLOORS; f++){
-        for(int b = 0; b < N_BUTTONS; b++){
-            int btnPressed = elevio_callButton(f, b);
+
+void buttonPushed(){ //Itererer gjennom alle knappene og legger til ordre hvis de er trykket på
+    for(int floor = 0; floor < N_FLOORS; floor++){
+        for(int button  = 0; button < N_BUTTONS; button++){
+            int btnPressed = elevio_callButton(floor, button);
             if (btnPressed){
-                addOrder(tilstand, f,b);
+                addOrder(floor,button);
             }
                 
-            elevio_buttonLamp(f, b, btnPressed);
+            
         }
     }
-};
-
-
-void executeOrder (tilstandsMaskin* tilstand) {
-    int currentOrderFloor;
-    int currentButtonType;
     
-    int projected_motorDir;
-    for (int i =0; i<20; i++) {
-       currentOrderFloor=tilstand->queueFloor[i];
-       currentButtonType=tilstand->queueButtonType[i];
-       projected_motorDir = sign(currentOrderFloor - tilstand->floorState);
+};
 
-       
+
+void executeOrder () {
+
+    //sjekker om en knapp tilhørende nåværende etasje er på
+        if (orderFloor(TM .floorState) ) {
+            printf("hei\n");
+            elevio_motorDirection(DIRN_STOP);
+            TM .motorDirection = DIRN_STOP;
+            cleanFloor();
+            return;
+            
+        }
+
+        if (TM .motorDirection == DIRN_STOP) {
+            
+            for (int floor = 0; floor < 4; floor++) {
+                if (orderFloor(floor)) {
+                    if (floor > TM .floorState) {
+                        elevio_motorDirection(DIRN_UP); TM .motorDirection=DIRN_UP;}
+                    else 
+                    {elevio_motorDirection(DIRN_DOWN); TM .motorDirection=DIRN_DOWN;}
+                    return;
+                }
+            }
+
+        }
+
+
+};
+
+
+
+void doorOpen(){
+     
+};
+
+void etasjePanel(){
+
+    if(elevio_floorSensor() != -1){
+        elevio_floorIndicator(TM .floorState);
     }
 };
 
 
-
-void doorOpen(tilstandsMaskin* tilstand){
-    elevio_doorOpenLamp(1);
-    tilstand->doorState = OPEN;
-    sleep(3);
-    elevio_doorOpenLamp(0);
-    tilstand->doorState = CLOSE;
-    executeOrder(tilstand);
-};
-
-void etasjePanel(tilstandsMaskin* tilstand){
-
-    if(tilstand->floorState != -1){
-        elevio_floorIndicator(tilstand->floorState);
-    }
-};
-
-
-void stateRefresh(tilstandsMaskin* tilstand) {
+void stateRefresh() {
     if(elevio_floorSensor()>-1){
-        tilstand->floorState = elevio_floorSensor();
+        TM .floorState = elevio_floorSensor();
     }
     
-    tilstand->obstruction = elevio_obstruction();
-    tilstand->stopButton = elevio_stopButton();
+    TM .obstruction = elevio_obstruction();
+    TM .stopButton = elevio_stopButton();
     
 }
+
+int orderFloor( int floor) {
+    for (int button = 0; button < 3; button++) {
+        if (TM .queue[floor][button]) {
+            return ON;
+        }
+    }
+    return OFF;
+};
