@@ -72,8 +72,8 @@ void buttonPushed(tilstandsMaskin* tilstand){ //Itererer gjennom alle knappene o
 void executeOrder (tilstandsMaskin* tilstand) {
     int currentOrderFloor;
     int currentButtonType;
-    
     int projected_motorDir;
+    
     for (int i =0; i<20; i++) {
        currentOrderFloor=tilstand->queueFloor[i];
        currentButtonType=tilstand->queueButtonType[i];
@@ -111,3 +111,14 @@ void stateRefresh(tilstandsMaskin* tilstand) {
     tilstand->stopButton = elevio_stopButton();
     
 }
+
+void nextOrder(tilstandsMaskin* tilstand) {
+    int currentFloor = tilstand->queueFloor[0];
+    int currentButtonType = tilstand->queueButtonType[0];
+    int least_dist = tilstand->queueFloor[1];
+
+    for (int i = 1; i<20;i++ ) {
+        if 
+    } 
+    
+};

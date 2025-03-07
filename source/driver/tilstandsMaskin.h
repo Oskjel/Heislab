@@ -42,3 +42,4 @@ void etasjePanel(tilstandsMaskin* tilstand); //tenn etasjelysene på etasjepanel
 
 void stateRefresh(tilstandsMaskin* tilstand);
 
+void nextOrder(tilstandsMaskin* tilstand);
