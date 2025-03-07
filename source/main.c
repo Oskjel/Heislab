@@ -21,7 +21,7 @@ int main(){
     while(!elevio_stopButton()){
         stateRefresh(pTM);
         buttonPushed(pTM); // Itererer gjennom alle knapper og legger til order dersom kanpp trykkes
-        
+        executeOrder(pTM);
         
        
         

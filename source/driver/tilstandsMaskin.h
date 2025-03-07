@@ -29,7 +29,9 @@ void executeOrder (tilstandsMaskin* tilstand); //Utfører ordre
 
 void addOrder(tilstandsMaskin* tilstand, int floor, ButtonType button); //Legger til ordre i køen [check]
 
-void removeOrder(tilstandsMaskin* tilstand); //Fjerner ordre fra køen [check]
+void cleanFloor(tilstandsMaskin* tilstand);
+
+void removeOrder(tilstandsMaskin* tilstand,int floor, ButtonType button); //Fjerner ordre fra køen [check]
 
 void cleanQueue(tilstandsMaskin* tilstand); //Tømmer hele køen [check]
 
