@@ -18,10 +18,10 @@ typedef struct {
     int floorState;
     int queueButtonType[20];
     int queueFloor[20];
-    int motorDirection;
-    int doorState;
-    int stopButton;
-    int obstruction;
+    MotorDirection motorDirection;
+    DOOR doorState;
+    BUTTON stopButton;
+    BUTTON obstruction;
 } tilstandsMaskin;
 
 void initialize_tilstandsMaskin(tilstandsMaskin * pTM);
@@ -42,3 +42,8 @@ void etasjePanel(tilstandsMaskin* tilstand); //tenn etasjelysene på etasjepanel
 
 void stateRefresh(tilstandsMaskin* tilstand);
 
+void obstructionActive(tilstandsMaskin* tilstand);
+
+void stopButtonActive( tilstandsMaskin* tilstand);
+
+void setLights(tilstandsMaskin* tilstand);//iterer gjennom queue matrisen og setter lys dersom knapp er på. 

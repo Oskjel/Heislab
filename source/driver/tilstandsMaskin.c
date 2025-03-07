@@ -111,3 +111,31 @@ void stateRefresh(tilstandsMaskin* tilstand) {
     tilstand->stopButton = elevio_stopButton();
     
 }
+
+void obstructionActive(tilstandsMaskin *tilstand)
+{
+    
+}
+
+void stopButtonActive(tilstandsMaskin *tilstand)
+{
+    cleanQueue(tilstand);
+}
+
+//iterer gjennom queue matrisen og setter lys dersom knapp er på. 
+void setLights(tilstandsMaskin *tilstand)
+{
+    if (tilstand->doorState == OPEN){
+
+    }
+    for (int floor = 0; floor < 4; floor++){
+        for (int but = 0; but < 3; but ++){
+            if (queue[floor][but] == ON){
+                elevio_buttonLamp(floor,queue[floor][but],ON);
+            }
+            else {
+                elevio_buttonLamp(floor,queue[floor][but],OFF);
+            }
+        }
+    }
+}

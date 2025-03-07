@@ -22,8 +22,9 @@ int main(){
         stateRefresh(pTM);
         buttonPushed(pTM); // Itererer gjennom alle knapper og legger til order dersom kanpp trykkes
         
-        
-       
+        if (pTM->obstruction == ON){
+            
+        }
         
     }
     
