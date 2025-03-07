@@ -8,10 +8,7 @@ void initialize_tilstandsMaskin(tilstandsMaskin * pTM) {
         elevio_motorDirection(DIRN_DOWN);
     }
     pTM->floorState = elevio_floorSensor();
-    for(int i = 0; i < 20; i++){
-        pTM->queueButtonType[i] = -1;
-        pTM->queueFloor[i] = -1;
-    }
+    pTM->queue = {{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}};
     pTM->motorDirection = DIRN_STOP;
     pTM->doorState = CLOSE;
     pTM->stopButton = OFF;
@@ -19,40 +16,15 @@ void initialize_tilstandsMaskin(tilstandsMaskin * pTM) {
 }
 
 void addOrder(tilstandsMaskin* tilstand, int floor, ButtonType button){
-
-    for(int i = 0; i < 20; i++){ 
-        
-        if(tilstand->queueButtonType[i] ==-1){
-        
-            tilstand->queueButtonType[i] = button;
-            tilstand->queueFloor[i] = floor;
-            break;
-        } else {
-            if(tilstand->queueFloor[i] == floor && tilstand->queueButtonType[i]==button) { // Legger ikke til eksisterende order
-                break;
-            }
-        }           
-}
+        tilstand->queue[floor][queue] = 1;
 };
 
-void removeOrder(tilstandsMaskin* tilstand){
-    
-    for(int i = 0; i < 20; i++){
-        tilstand->queueButtonType[i] = tilstand->queueButtonType[i+1]; //Flytter alle elementene en plass frem
-        tilstand->queueFloor[i] = tilstand->queueFloor[i+1];
-        if (tilstand->queueButtonType[i] == -1){
-            tilstand->queueButtonType[i] = -1; //Tømmer siste element
-            tilstand->queueFloor[i] = -1;
-            break;
-        }
-    }
+void removeOrder(tilstandsMaskin* tilstand,  int floor, ButtonType button){
+    tilstand->queue[floor][queue] = 0;
     
 };
 void cleanQueue(tilstandsMaskin* tilstand){
-    for(int i = 0; i < 20; i++){
-        tilstand->queueButtonType[i] = -1;
-        tilstand->queueFloor[i] = -1;
-    }
+    tilstand->queue = {{0,0,0}, {0,0,0}, {0,0,0}, {0,0,0}};
 };
 
 void buttonPushed(tilstandsMaskin* tilstand){ //Itererer gjennom alle knappene og legger til ordre hvis de er trykket på
@@ -70,18 +42,43 @@ void buttonPushed(tilstandsMaskin* tilstand){ //Itererer gjennom alle knappene o
 
 
 void executeOrder (tilstandsMaskin* tilstand) {
-    int currentOrderFloor;
-    int currentButtonType;
-    int projected_motorDir;
-    
-    for (int i =0; i<20; i++) {
-       currentOrderFloor=tilstand->queueFloor[i];
-       currentButtonType=tilstand->queueButtonType[i];
-       projected_motorDir = sign(currentOrderFloor - tilstand->floorState);
 
-       
+if (tilstand->motorDirection == DIRN_STOP) {
+    for (int i = tilstand->floorState; i < 4; i++) {
+        for (int j = 0; j < 3; j++)
+        {
+            if (tilstand->queue[i][j] && i > floorState) {
+                elevio_motorDirection(DIRN_UP);
+            }
+            else if (tilstand->queue[i][j] && i < floorState) {
+                elevio_motorDirection(DIRN_DOWN);
+            }
+        }
+        
     }
-};
+}
+else if (tilstand->motorDirection == DIRN_UP) {
+
+    for (int i = tilstand->floorState; i < 4; i++) {
+        
+              if (tilstand->queue[i][0]||tilstand->queue[i][2]) {
+                elevio_motorDirection(DIRN_UP);
+                break;
+              }      
+              
+    }
+}
+else  {
+    for (int i = tilstand->floorState; i >=0 ; i--) {
+        for (int j = 0; j < 2; j++) {
+                if (tilstand->queue[i][0]||tilstand->queue[i][1]) {
+                    void elevio_motorDirection(DIRN_DOWN);
+                    break;
+              }      
+        }      
+    }
+}
+}
 
 
 

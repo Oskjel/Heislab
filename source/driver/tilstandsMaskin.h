@@ -16,8 +16,7 @@ typedef enum {
 
 typedef struct {
     int floorState;
-    int queueButtonType[20];
-    int queueFloor[20];
+    int queue[4][3];
     int motorDirection;
     int doorState;
     int stopButton;
