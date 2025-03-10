@@ -1,12 +1,26 @@
 
+#include "elevio.h"
 #include "tilstandsMaskin.h"
 
+
+tilstandsMaskin TM;
+
+void cleanQueue(){
+    for (int floor = 0; floor < N_FLOORS; floor++) {
+        for (int button =0; button < N_BUTTONS; button++) {
+            TM .queue[floor][button]=0;
+            elevio_buttonLamp(floor, button, OFF);
+        }
+    }
+    
+};
 
 void initialize_tilstandsMaskin() {
     while (elevio_floorSensor()==-1)
     {
         elevio_motorDirection(DIRN_DOWN);
     }
+    cleanQueue();
     elevio_motorDirection(DIRN_STOP);
 
     TM .floorState = elevio_floorSensor();
@@ -26,6 +40,7 @@ void initialize_tilstandsMaskin() {
 void addOrder( int floor, ButtonType button){
     if (!TM .queue[floor][button]) { // Stopper kontinuerlig setting av ordre dersom ordre fra før
         TM .queue[floor][button] = 1;
+        elevio_buttonLamp(floor, button, ON);
 
     }
         
@@ -37,18 +52,13 @@ void removeOrder(int floor, ButtonType button){
     
     
 };
-  void cleanQueue(){
-    for (int i = 0; i < 4; i++) {
-        for (int j =0; j < 3; j++) {
-            TM .queue[i][j]=0;
-        }
-    }
-    
-};
+  
   void cleanFloor(){
     
-        for (int j =0; j < 3; j++) {
-            TM .queue[TM .floorState][j]=0;
+        for (int button =0; button < 3; button++) {
+            TM .queue[TM .floorState][button]=0;
+            elevio_buttonLamp(TM.floorState, button, OFF);
+            printf("%d", TM.floorState);
         }
     
 };
@@ -73,7 +83,7 @@ void executeOrder () {
 
     //sjekker om en knapp tilhørende nåværende etasje er på
         if (orderFloor(TM .floorState) ) {
-            printf("hei\n");
+            
             elevio_motorDirection(DIRN_STOP);
             TM .motorDirection = DIRN_STOP;
             cleanFloor();
@@ -109,10 +119,17 @@ void etasjePanel(){
     }
 };
 
+int floorChange() {
+    if(TM .floorState != elevio_floorSensor() && elevio_floorSensor()!=-1) {
+        
+        return 1;
+    }
+    return 0;
+    
+}
 
 void stateRefresh() {
     TM.changeFloor = floorChange();
-    printf("%d", TM.changeFloor);
     TM .obstruction = elevio_obstruction();
     TM .stopButton = elevio_stopButton();
    
@@ -121,16 +138,13 @@ void stateRefresh() {
         TM .floorState = elevio_floorSensor();
         
     }
-    if (TM.changeFloor) {elevio_floorIndicator(TM.floorState);}
-   
-   
-    
+    if (TM.changeFloor) {
+        
+        elevio_floorIndicator(TM.floorState);
+    }
     
 }
-int floorChange() {
-    printf("check");
-    return (!(TM .floorState == elevio_floorSensor()) && elevio_floorSensor()!=-1);
-}
+
 
 int orderFloor( int floor) {
     for (int button = 0; button < 3; button++) {

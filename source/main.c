@@ -1,7 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <time.h>
+
 #include "driver/elevio.h"
 #include "driver/tilstandsMaskin.h"
 #include "driver/helpful_func.h"
@@ -10,8 +8,8 @@
 
 
 int main(){
-    elevio_init();
-    
+    elevio_init();  
+ 
     initialize_tilstandsMaskin();
     
     printf("=== Example Program ===\n");
@@ -19,12 +17,13 @@ int main(){
 
 
     while(!elevio_stopButton()){
-        if (TM .floorState != elevio_floorSensor() && elevio_floorSensor()!=-1) {printf("funker");}
+        
         stateRefresh();
         buttonPushed(); // Itererer gjennom alle knapper og legger til order dersom kanpp trykkes
         executeOrder();
-        
+      
     }
+    
 
 
     

@@ -21,9 +21,12 @@ typedef struct {
     int doorState;
     int stopButton;
     int obstruction;
+    int changeFloor;
 } tilstandsMaskin;
 
-tilstandsMaskin TM;
+extern tilstandsMaskin TM;
+
+
 
 void initialize_tilstandsMaskin();
 
