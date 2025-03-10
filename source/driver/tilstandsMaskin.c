@@ -24,8 +24,9 @@ void initialize_tilstandsMaskin() {
 }
 
 void addOrder( int floor, ButtonType button){
-    if (!TM .queue[floor][button]) {
+    if (!TM .queue[floor][button]) { // Stopper kontinuerlig setting av ordre dersom ordre fra før
         TM .queue[floor][button] = 1;
+
     }
         
         
@@ -112,6 +113,7 @@ void etasjePanel(){
 void stateRefresh() {
     if(elevio_floorSensor()>-1){
         TM .floorState = elevio_floorSensor();
+        etasjePanel();
     }
     
     TM .obstruction = elevio_obstruction();
