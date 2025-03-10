@@ -19,9 +19,11 @@ int main(){
 
 
     while(!elevio_stopButton()){
+        if (TM .floorState != elevio_floorSensor() && elevio_floorSensor()!=-1) {printf("funker");}
         stateRefresh();
         buttonPushed(); // Itererer gjennom alle knapper og legger til order dersom kanpp trykkes
         executeOrder();
+        
     }
 
 
