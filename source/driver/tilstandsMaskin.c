@@ -111,14 +111,23 @@ void etasjePanel(){
 
 
 void stateRefresh() {
-    if(elevio_floorSensor()>-1){
-        TM .floorState = elevio_floorSensor();
-        etasjePanel();
-    }
-    
+    TM.changeFloor = floorChange();
     TM .obstruction = elevio_obstruction();
     TM .stopButton = elevio_stopButton();
+   
+
+    if(elevio_floorSensor()>-1){
+        TM .floorState = elevio_floorSensor();
+        
+    }
+    if (TM.changeFloor) {elevio_floorIndicator(TM.floorState);}
+   
+   
     
+    
+}
+int floorChange() {
+    return (!(TM .floorState == elevio_floorSensor()) && elevio_floorSensor()!=-1);
 }
 
 int orderFloor( int floor) {
