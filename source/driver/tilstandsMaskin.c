@@ -112,6 +112,7 @@ void etasjePanel(){
 
 void stateRefresh() {
     TM.changeFloor = floorChange();
+    printf("%d", TM.changeFloor);
     TM .obstruction = elevio_obstruction();
     TM .stopButton = elevio_stopButton();
    
@@ -127,6 +128,7 @@ void stateRefresh() {
     
 }
 int floorChange() {
+    printf("check");
     return (!(TM .floorState == elevio_floorSensor()) && elevio_floorSensor()!=-1);
 }
 
