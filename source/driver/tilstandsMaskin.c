@@ -24,7 +24,10 @@ void initialize_tilstandsMaskin() {
 }
 
 void addOrder( int floor, ButtonType button){
+    if (!TM .queue[floor][button]) {
         TM .queue[floor][button] = 1;
+    }
+        
         
 };
 
@@ -90,8 +93,6 @@ void executeOrder () {
             }
 
         }
-
-
 };
 
 
