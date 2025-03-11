@@ -16,13 +16,14 @@ int main(){
     printf("Press the stop button on the elevator panel to exit\n");
 
 
-    while(!elevio_stopButton()){
+    while(1){
         
         stateRefresh();
         buttonPushed(); // Itererer gjennom alle knapper og legger til order dersom kanpp trykkes
         executeOrder();
       
     }
+    
     
 
 

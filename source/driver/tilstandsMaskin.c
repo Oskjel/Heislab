@@ -15,6 +15,12 @@ void cleanQueue(){
     
 };
 
+void set_lastFloor(){
+    if (elevio_floorSensor()==-1) {
+        TM.lastFloor = TM.floorState;
+    }
+}
+
 void initialize_tilstandsMaskin() {
     while (elevio_floorSensor()==-1)
     {
@@ -30,6 +36,7 @@ void initialize_tilstandsMaskin() {
             TM .queue[i][j]=0;
         }
     }
+    
     TM.lastMovingDirection = DIRN_STOP;
     TM .motorDirection = DIRN_STOP;
     TM .doorState = CLOSE;
@@ -79,20 +86,74 @@ void buttonPushed(){ //Itererer gjennom alle knappene og legger til ordre hvis d
     
 };
 
+void while_stop_hold() {
+    if(TM.stopButton) {
+        while (TM.stopButton && elevio_floorSensor()!=-1 || TM.obstruction && TM.doorState) {
+            stateRefresh();
+        if (TM.doorState == CLOSE) {
+            elevio_doorOpenLamp(ON);
+            TM.doorState = OPEN;
+        } 
+         
+    }
+         
+    timer_3s();
+    TM.doorState = CLOSE;
+    elevio_doorOpenLamp(OFF);  
+    
+
+    } 
+}
+
 
 void executeOrder () {
+    while_stop_hold();
+  
+    if (TM.doorState || TM.stopButton) {
+        elevio_motorDirection(DIRN_STOP);
+        cleanQueue();
+        return;
+    }
     //tror ikke dette vil fungere dersom, vi tømmer queuen, og venter på nye bestillinger. 
     //Da må vi sørge for at last moving direction blir satt til dirn stop.
-
+    
+    /*else if(!TM.stopButton && elevio_floorSensor()!=-1) {
+        
+    }
+    */
     //sjekker om en knapp tilhørende nåværende etasje er på
-    if (orderFloor(TM.floorState) ) {
+    if (orderFloor(TM.floorState) && TM.floorState != TM.lastFloor) {
         elevio_motorDirection(DIRN_STOP);
         TM .motorDirection = DIRN_STOP;
         cleanFloor();
+        TM.doorState = ON;
+        elevio_doorOpenLamp(ON);
+        timer();
+        TM.doorState = CLOSE;
+        elevio_doorOpenLamp(OFF);  
         return;
             
     }
 
+    for (int f = 0; f < N_FLOORS; f++) {
+        if (orderFloor(f)) {
+            if (f > TM.floorState) {
+                elevio_motorDirection(DIRN_UP);
+                TM.motorDirection = DIRN_UP;
+            } else if (f< TM.motorDirection) {
+                elevio_motorDirection(DIRN_DOWN);
+                TM.motorDirection = DIRN_DOWN;
+            }
+            else {
+                elevio_motorDirection(DIRN_STOP);
+                TM.motorDirection = DIRN_STOP;
+            }
+            // Update lastMovingDirection to the chosen direction.
+            
+            return;
+        }
+    }
+    /*
 // If the elevator is stopped and there's no last moving direction set, decide based on nearest order.
 if (TM.motorDirection == DIRN_STOP && TM.lastMovingDirection == DIRN_STOP) {
     for (int f = 0; f < N_FLOORS; f++) {
@@ -157,30 +218,41 @@ if (TM.lastMovingDirection == DIRN_UP) {
 // If no orders exist, remain stopped.
 elevio_motorDirection(DIRN_STOP);
 TM.motorDirection = DIRN_STOP;
+*/
 
-/*
-        if (TM.motorDirection == DIRN_STOP) {
-            
-            for (int floor = 0; floor < 4; floor++) {
-                if (orderFloor(floor)) {
-                    if (floor > TM .floorState) {
-                        elevio_motorDirection(DIRN_UP); TM .motorDirection=DIRN_UP;}
-                    else 
-                    {elevio_motorDirection(DIRN_DOWN); TM .motorDirection=DIRN_DOWN;}
-                    return;
-                }
-            }
-
-        }
-        */
-       //denne koden gjør at bestillinger i nedre etasjer prioriteres. 
 };
 
 
 
 void doorOpen(){
-     
+     TM.doorState = OPEN;
+
 };
+
+void timer_3s(){
+  
+    struct timespec start, now;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    do {
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        buttonPushed();
+    } while ((now.tv_sec - start.tv_sec) < 3);
+   
+}
+void timer(){
+  
+    struct timespec start, now;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    do {
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        buttonPushed();
+        stateRefresh();
+    } while ((now.tv_sec - start.tv_sec) < 3 || TM.stopButton && elevio_floorSensor()!=-1 || TM.obstruction && TM.doorState) ;
+   if (now.tv_sec - start.tv_sec > 3.5) {
+    timer_3s();
+   }
+}
+
 
 void etasjePanel(){
 
@@ -202,6 +274,7 @@ void stateRefresh() {
     TM.changeFloor = floorChange();
     TM .obstruction = elevio_obstruction();
     TM .stopButton = elevio_stopButton();
+    set_lastFloor();
     
     if (TM.motorDirection != DIRN_STOP){
         TM.lastMovingDirection = TM.motorDirection;
@@ -220,15 +293,30 @@ void stateRefresh() {
 
 
 int orderFloor(int floor) {
-    for (int button = 0; button < 3; button++) {
-        //printf("%d", TM.floorState);
-        
-        assert(floor>=0 && floor < N_FLOORS); //programmet prøver å akksessere
-        //minne som er utenfor scopet til queue.
-        if (TM.queue[floor][button]) {
-            return ON;
-        }        
+    
+    assert(floor >= 0 && floor < N_FLOORS);
 
+    for (int button = 0; button < N_BUTTONS; button++) {
+        if (TM.queue[floor][button]) {
+            // Always service a cab call.
+            if (button == BUTTON_CAB) {
+                return ON;
+            }
+            // If the elevator is stopped, service any call.
+            else if (TM.motorDirection == DIRN_STOP) {
+                return ON;
+            }
+            // If moving up, only service hall-up orders.
+            else if (TM.motorDirection == DIRN_UP && button == BUTTON_HALL_UP) {
+                return ON;
+            }
+            // If moving down, only service hall-down orders.
+            else if (TM.motorDirection == DIRN_DOWN && button == BUTTON_HALL_DOWN) {
+                return ON;
+            }
+        }
     }
     return OFF;
+    
+
 };

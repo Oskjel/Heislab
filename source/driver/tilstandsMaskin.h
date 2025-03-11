@@ -3,6 +3,7 @@
 #include "elevio.h"
 #include "con_load.h"
 #include "helpful_func.h"
+#include <time.h>
 
 
 typedef enum {
@@ -24,6 +25,7 @@ typedef struct {
     int obstruction;
     int changeFloor;
     int lastMovingDirection;
+    int lastFloor;
 } tilstandsMaskin;
 
 extern tilstandsMaskin TM;
@@ -46,7 +48,11 @@ void buttonPushed(); //Itererer gjennom alle knappene og legger til ordre hvis d
 
 void doorOpen(); //Åpner døren og venter i 3 sekunder, endrer intern tilstand til åpen og lukket + lys
 
-
+void timer_3s();
+void timer();
 void stateRefresh();
+void while_stop_hold();
+
+
 
 int orderFloor(int floor);
