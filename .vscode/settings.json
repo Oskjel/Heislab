@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "tilstandsmaskin.h": "c"
+        "tilstandsmaskin.h": "c",
+        "cmath": "cpp"
     }
 }

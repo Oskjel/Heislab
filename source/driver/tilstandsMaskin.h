@@ -16,29 +16,32 @@ typedef enum {
 
 typedef struct {
     int floorState;
-    int queueButtonType[20];
-    int queueFloor[20];
+    int queue[4][3];
     int motorDirection;
     int doorState;
     int stopButton;
     int obstruction;
 } tilstandsMaskin;
 
-void initialize_tilstandsMaskin(tilstandsMaskin * pTM);
+tilstandsMaskin TM;
 
-void executeOrder (tilstandsMaskin* tilstand); //Utfører ordre 
+void initialize_tilstandsMaskin();
 
-void addOrder(tilstandsMaskin* tilstand, int floor, ButtonType button); //Legger til ordre i køen [check]
+void executeOrder (); //Utfører ordre 
 
-void removeOrder(tilstandsMaskin* tilstand); //Fjerner ordre fra køen [check]
+void addOrder(int floor, ButtonType button); //Legger til ordre i køen [check]
 
-void cleanQueue(tilstandsMaskin* tilstand); //Tømmer hele køen [check]
+void cleanFloor();
 
-void buttonPushed(tilstandsMaskin* tilstand); //Itererer gjennom alle knappene og legger til ordre hvis de er trykket på
+void removeOrder(int floor, ButtonType button); //Fjerner ordre fra køen [check]
 
-void doorOpen(tilstandsMaskin* tilstand); //Åpner døren og venter i 3 sekunder, endrer intern tilstand til åpen og lukket + lys
+void cleanQueue(); //Tømmer hele køen [check]
 
-void etasjePanel(tilstandsMaskin* tilstand); //tenn etasjelysene på etasjepanelet
+void buttonPushed(); //Itererer gjennom alle knappene og legger til ordre hvis de er trykket på
 
-void stateRefresh(tilstandsMaskin* tilstand);
+void doorOpen(); //Åpner døren og venter i 3 sekunder, endrer intern tilstand til åpen og lukket + lys
 
+
+void stateRefresh();
+
+int orderFloor(int floor);
