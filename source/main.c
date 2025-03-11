@@ -27,7 +27,7 @@ int main(){
 
 
     
-   
+   elevio_motorDirection(DIRN_STOP);
     
     //tilstandsMaskin* tilstand = new tilstandsMaskin();
 /*

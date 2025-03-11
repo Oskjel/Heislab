@@ -1,7 +1,7 @@
 
 #include "elevio.h"
 #include "tilstandsMaskin.h"
-
+#include <assert.h>
 
 tilstandsMaskin TM;
 
@@ -20,8 +20,9 @@ void initialize_tilstandsMaskin() {
     {
         elevio_motorDirection(DIRN_DOWN);
     }
-    cleanQueue();
     elevio_motorDirection(DIRN_STOP);
+    cleanQueue();
+    
 
     TM .floorState = elevio_floorSensor();
      for (int i = 0; i < 4; i++) {
@@ -29,7 +30,7 @@ void initialize_tilstandsMaskin() {
             TM .queue[i][j]=0;
         }
     }
-
+    TM.lastMovingDirection = DIRN_STOP;
     TM .motorDirection = DIRN_STOP;
     TM .doorState = CLOSE;
     TM .stopButton = OFF;
@@ -53,12 +54,12 @@ void removeOrder(int floor, ButtonType button){
     
 };
   
-  void cleanFloor(){
+  void cleanFloor(){elevio_motorDirection(DIRN_STOP);
     
         for (int button =0; button < 3; button++) {
-            TM .queue[TM .floorState][button]=0;
+            TM .queue[TM.floorState][button]=0;
             elevio_buttonLamp(TM.floorState, button, OFF);
-            printf("%d", TM.floorState);
+            //printf("%d", TM.floorState);
         }
     
 };
@@ -80,18 +81,85 @@ void buttonPushed(){ //Itererer gjennom alle knappene og legger til ordre hvis d
 
 
 void executeOrder () {
+    //tror ikke dette vil fungere dersom, vi tømmer queuen, og venter på nye bestillinger. 
+    //Da må vi sørge for at last moving direction blir satt til dirn stop.
 
     //sjekker om en knapp tilhørende nåværende etasje er på
-        if (orderFloor(TM .floorState) ) {
+    if (orderFloor(TM.floorState) ) {
+        elevio_motorDirection(DIRN_STOP);
+        TM .motorDirection = DIRN_STOP;
+        cleanFloor();
+        return;
             
-            elevio_motorDirection(DIRN_STOP);
-            TM .motorDirection = DIRN_STOP;
-            cleanFloor();
-            return;
-            
-        }
+    }
 
-        if (TM .motorDirection == DIRN_STOP) {
+// If the elevator is stopped and there's no last moving direction set, decide based on nearest order.
+if (TM.motorDirection == DIRN_STOP && TM.lastMovingDirection == DIRN_STOP) {
+    for (int f = 0; f < N_FLOORS; f++) {
+        if (orderFloor(f)) {
+            if (f > TM.floorState) {
+                elevio_motorDirection(DIRN_UP);
+                TM.motorDirection = DIRN_UP;
+            } else {
+                elevio_motorDirection(DIRN_DOWN);
+                TM.motorDirection = DIRN_DOWN;
+            }
+            // Update lastMovingDirection to the chosen direction.
+            TM.lastMovingDirection = TM.motorDirection;
+            return;
+        }
+    }
+}
+
+// If the last moving direction is down, scan downward first.
+if (TM.lastMovingDirection == DIRN_DOWN) {
+    // Look downward from the current floor.
+    for (int f = TM.floorState - 1; f >= 0; f--) {
+        if (orderFloor(f)) {
+            elevio_motorDirection(DIRN_DOWN);
+            TM.motorDirection = DIRN_DOWN;
+            // Keep lastMovingDirection as down.
+            return;
+        }
+    }
+    // If no orders downward, scan upward.
+    for (int f = TM.floorState + 1; f < N_FLOORS; f++) {
+        if (orderFloor(f)) {
+            elevio_motorDirection(DIRN_UP);
+            TM.motorDirection = DIRN_UP;
+            TM.lastMovingDirection = DIRN_UP;
+            return;
+        }
+    }
+}
+
+// If the last moving direction is up, scan upward first.
+if (TM.lastMovingDirection == DIRN_UP) {
+    // Look upward from the current floor.
+    for (int f = TM.floorState + 1; f < N_FLOORS; f++) {
+        if (orderFloor(f)) {
+            elevio_motorDirection(DIRN_UP);
+            TM.motorDirection = DIRN_UP;
+            return;
+        }
+    }
+    // If no orders upward, scan downward.
+    for (int f = TM.floorState - 1; f >= 0; f--) {
+        if (orderFloor(f)) {
+            elevio_motorDirection(DIRN_DOWN);
+            TM.motorDirection = DIRN_DOWN;
+            TM.lastMovingDirection = DIRN_DOWN;
+            return;
+        }
+    }
+}
+
+// If no orders exist, remain stopped.
+elevio_motorDirection(DIRN_STOP);
+TM.motorDirection = DIRN_STOP;
+
+/*
+        if (TM.motorDirection == DIRN_STOP) {
             
             for (int floor = 0; floor < 4; floor++) {
                 if (orderFloor(floor)) {
@@ -104,6 +172,8 @@ void executeOrder () {
             }
 
         }
+        */
+       //denne koden gjør at bestillinger i nedre etasjer prioriteres. 
 };
 
 
@@ -120,7 +190,7 @@ void etasjePanel(){
 };
 
 int floorChange() {
-    if(TM .floorState != elevio_floorSensor() && elevio_floorSensor()!=-1) {
+    if(TM .floorState!= elevio_floorSensor() && elevio_floorSensor()!=-1) {
         
         return 1;
     }
@@ -132,9 +202,12 @@ void stateRefresh() {
     TM.changeFloor = floorChange();
     TM .obstruction = elevio_obstruction();
     TM .stopButton = elevio_stopButton();
-   
+    
+    if (TM.motorDirection != DIRN_STOP){
+        TM.lastMovingDirection = TM.motorDirection;
+    }
 
-    if(elevio_floorSensor()>-1){
+    if(elevio_floorSensor()!=-1){
         TM .floorState = elevio_floorSensor();
         
     }
@@ -146,11 +219,16 @@ void stateRefresh() {
 }
 
 
-int orderFloor( int floor) {
+int orderFloor(int floor) {
     for (int button = 0; button < 3; button++) {
-        if (TM .queue[floor][button]) {
+        //printf("%d", TM.floorState);
+        
+        assert(floor>=0 && floor < N_FLOORS); //programmet prøver å akksessere
+        //minne som er utenfor scopet til queue.
+        if (TM.queue[floor][button]) {
             return ON;
-        }
+        }        
+
     }
     return OFF;
 };

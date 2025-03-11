@@ -4,6 +4,7 @@
 #include "con_load.h"
 #include "helpful_func.h"
 
+
 typedef enum {
     OPEN = 1,
     CLOSE = 0
@@ -22,6 +23,7 @@ typedef struct {
     int stopButton;
     int obstruction;
     int changeFloor;
+    int lastMovingDirection;
 } tilstandsMaskin;
 
 extern tilstandsMaskin TM;
