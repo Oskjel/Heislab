@@ -90,22 +90,34 @@ void buttonPushed(){ //Itererer gjennom alle knappene og legger til ordre hvis d
 
 void while_stop_hold() {
    
-    if(TM.stopButton) {
+    if(TM.stopButton && elevio_floorSensor()!=-1 ) {
         while (TM.stopButton && elevio_floorSensor()!=-1 || TM.obstruction && TM.doorState) {
             stateRefresh();
         if (TM.doorState == CLOSE) {
             elevio_doorOpenLamp(ON);
             TM.doorState = OPEN;
         } 
-         
-    }
-         
+       
+    } 
+      
     timer_3s();
     TM.doorState = CLOSE;
     elevio_doorOpenLamp(OFF);  
-    
-
+    cleanQueue();
+    return;
     } 
+    
+    if (TM.stopButton)  {
+        while (TM.stopButton) {
+            stateRefresh();
+            TM.doorState = CLOSE;
+            TM.motorDirection = DIRN_STOP;
+            elevio_motorDirection(DIRN_STOP);
+        }
+        cleanQueue();
+        return;
+    }
+    
 }
 
 
@@ -122,6 +134,11 @@ void executeOrder () {
     // Gå til hva som helst
     
     if (TM.lastMovingDirection == DIRN_STOP){
+        if (nextProjectedFloor()==TM.floorState) {
+            printf("Hola");
+            doorOpen();
+        }
+
         for (int floor = 0; floor < N_FLOORS; floor++){
             if(orderFloor(floor)){
                 TM.motorDirection = sign(floor - TM.floorState);
@@ -129,6 +146,7 @@ void executeOrder () {
                 return;
             }
         }
+        
     }
 
     if (ordersInQueue() == OFF && TM.motorDirection == DIRN_STOP){
