@@ -406,12 +406,17 @@ int nextProjectedFloor(void) {
         for (floor = currentFloor + 1; floor < N_FLOORS; floor++) {
             if (floor == N_FLOORS - 1) {
                 // At the top floor, only the hall down button is physically present.
+                
                 if (TM.queue[floor][BUTTON_HALL_DOWN] || TM.queue[floor][BUTTON_CAB]) {
                     return floor;
                 }
+                
+                    
                     
                     // For middle floors, only hall up calls are accepted.
-                } else if (TM.queue[floor][BUTTON_HALL_UP] || TM.queue[floor][BUTTON_CAB]) {
+                } 
+                
+                else if (TM.queue[floor][BUTTON_HALL_UP] || TM.queue[floor][BUTTON_CAB]) {
                     return floor;
                 }
                 else if (TM.queue[floor][BUTTON_HALL_DOWN] && orderCount()==1) {
@@ -420,7 +425,7 @@ int nextProjectedFloor(void) {
                 else if (TM.queue[1][1] && TM.queue[2][1] && orderCount()==2) {
                     return 2;
                 }
-                    
+                
             }
           /*  
             if (TM.queue[floor][BUTTON_HALL_DOWN] && fallbackCandidate == -1){
@@ -435,6 +440,7 @@ int nextProjectedFloor(void) {
                     return floor;
             } else {
                 // For middle floors, only hall down calls are accepted.
+                
                 if (TM.queue[floor][BUTTON_HALL_DOWN] || TM.queue[floor][BUTTON_CAB])
                     return floor;
 
