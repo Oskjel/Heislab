@@ -17,7 +17,7 @@ int main(){
 
 
     while(1){
-        
+        printf("Neste etasje: %d\n DIR: %d \n",nextProjectedFloor(),TM.lastMovingDirection);
         stateRefresh();
         buttonPushed(); // Itererer gjennom alle knapper og legger til order dersom kanpp trykkes
         executeOrder();

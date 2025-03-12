@@ -26,9 +26,11 @@ typedef struct {
     int changeFloor;
     int lastMovingDirection;
     int lastFloor;
+    int projectedFloor;
 } tilstandsMaskin;
 
 extern tilstandsMaskin TM;
+
 
 
 
@@ -52,7 +54,8 @@ void timer_3s();
 void timer();
 void stateRefresh();
 void while_stop_hold();
-
-
+int nextProjectedFloor(void);
+int nextFloor();
 
 int orderFloor(int floor);
+int ordersInQueue();
