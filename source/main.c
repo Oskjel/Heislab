@@ -21,6 +21,7 @@ int main(){
         stateRefresh();
         buttonPushed(); // Itererer gjennom alle knapper og legger til order dersom kanpp trykkes
         executeOrder();
+        TM.projectedFloor = nextProjectedFloor();
       
     }
     
