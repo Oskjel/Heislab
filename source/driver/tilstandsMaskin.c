@@ -126,6 +126,7 @@ void executeOrder () {
             if(orderFloor(floor)){
                 TM.motorDirection = sign(floor - TM.floorState);
                 elevio_motorDirection(TM.motorDirection);
+                return;
             }
         }
     }
@@ -158,7 +159,7 @@ void executeOrder () {
     // However, also verify that the floor sensor shows a valid floor.
 
     //sTOPPER KUN NÅR DET ER -1
-    else if (TM.floorState != -1 || TM.projectedFloor == TM.floorState) {
+    else if ((elevio_floorSensor()!=-1 || TM.projectedFloor == TM.floorState)) {
         doorOpen();
     }
 
@@ -381,21 +382,35 @@ int nextProjectedFloor(void) {
     }
 
     int floor;
+    int fallbackCandidate = -1;
     // First, scan in the current moving direction.
     if (direction == DIRN_UP) {
         for (floor = currentFloor + 1; floor < N_FLOORS; floor++) {
             if (floor == N_FLOORS - 1) {
                 // At the top floor, only the hall down button is physically present.
-                if (TM.queue[floor][BUTTON_HALL_DOWN] || TM.queue[floor][BUTTON_CAB])
+                if (TM.queue[floor][BUTTON_HALL_DOWN] || TM.queue[floor][BUTTON_CAB]) {
                     return floor;
-            } else {
-                // For middle floors, only hall up calls are accepted.
-                if (TM.queue[floor][BUTTON_HALL_UP] || TM.queue[floor][BUTTON_CAB])
+                }
+                    
+                    // For middle floors, only hall up calls are accepted.
+                } else if (TM.queue[floor][BUTTON_HALL_UP] || TM.queue[floor][BUTTON_CAB]) {
                     return floor;
+                }
+                else if (TM.queue[floor][BUTTON_HALL_DOWN] && orderCount()==1) {
+                    return floor;
+                }
+                else if (TM.queue[1][1] && TM.queue[2][1] && orderCount()==2) {
+                    return 2;
+                }
+                    
             }
-        }
-    } else if (direction == DIRN_DOWN) {
-        for (floor = currentFloor - 1; floor >= 0; floor--) {
+          /*  
+            if (TM.queue[floor][BUTTON_HALL_DOWN] && fallbackCandidate == -1){
+                fallbackCandidate =
+            }
+*/
+        } else if (direction == DIRN_DOWN) {
+            for (floor = currentFloor - 1; floor >= 0; floor--) {
             if (floor == 0) {
                 // At the ground floor, only the hall up button is physically present.
                 if (TM.queue[floor][BUTTON_HALL_UP] || TM.queue[floor][BUTTON_CAB])
@@ -404,37 +419,32 @@ int nextProjectedFloor(void) {
                 // For middle floors, only hall down calls are accepted.
                 if (TM.queue[floor][BUTTON_HALL_DOWN] || TM.queue[floor][BUTTON_CAB])
                     return floor;
-            }
-        }
-    }
 
-    /*
-    // If no order was found in the current direction, scan the opposite direction.
-    if (direction == DIRN_UP) {
-        for (floor = currentFloor - 1; floor >= 0; floor--) {
-            // Here, for the ground floor, accept any hall call.
-            if (floor == 0) {
-                if (TM.queue[floor][BUTTON_HALL_UP] || TM.queue[floor][BUTTON_CAB])
-                    return floor;
-            } else {
-                if (TM.queue[floor][BUTTON_HALL_DOWN] || TM.queue[floor][BUTTON_CAB])
-                    return floor;
-            }
-        }
-    } else if (direction == DIRN_DOWN) {
-        for (floor = currentFloor + 1; floor < N_FLOORS; floor++) {
-            // At the top floor, accept any hall call.
-            if (floor == N_FLOORS - 1) {
-                if (TM.queue[floor][BUTTON_HALL_DOWN] || TM.queue[floor][BUTTON_CAB])
-                    return floor;
-            } else {
-                if (TM.queue[floor][BUTTON_HALL_UP] || TM.queue[floor][BUTTON_CAB])
-                    return floor;
+                else if (TM.queue[floor][BUTTON_HALL_UP] && orderCount()==1) {
+                        return floor;
+                    }
+                else if (TM.queue[1][0] && TM.queue[2][0] && orderCount()==2) {
+                    return 1;
+                }
             }
         }
     }
-        */
+    //Vi har ikke tatt med et tilfelle der vi skal ned og har trykket på opp eller vice versa. Derfor får vi rar oppførsel
+    //Dersom vi bare tar disse med i eller-statement vil heisen stoppe  alle etasjer
+
 
     // If no orders are found in either direction, return a sentinel value.
     return -1;
+}
+
+int orderCount() {
+    int antall = 0;
+    for (int i  = 0; i< N_FLOORS; i++) {
+        for (int j = 0; j < N_BUTTONS; j++) {
+            if (TM.queue[i][j]) {
+                antall++;
+            }
+        }
+    }
+    return antall;
 }

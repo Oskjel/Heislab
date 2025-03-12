@@ -59,3 +59,4 @@ int nextFloor();
 
 int orderFloor(int floor);
 int ordersInQueue();
+int orderCount();
