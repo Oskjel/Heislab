@@ -93,13 +93,18 @@ void while_stop_hold() {
     if(TM.stopButton && elevio_floorSensor()!=-1 ) {
         while (TM.stopButton && elevio_floorSensor()!=-1 || TM.obstruction && TM.doorState) {
             stateRefresh();
+            printf("=== stop button on===\n");
+    
         if (TM.doorState == CLOSE) {
             elevio_doorOpenLamp(ON);
             TM.doorState = OPEN;
         } 
+        if (TM.stopButton == ON){
+            cleanQueue();
+        }
        
     } 
-      
+    printf("=== timer_3s function reached===\n");
     timer_3s();
     TM.doorState = CLOSE;
     elevio_doorOpenLamp(OFF);  
@@ -110,6 +115,7 @@ void while_stop_hold() {
     if (TM.stopButton)  {
         while (TM.stopButton) {
             stateRefresh();
+            cleanQueue();
             TM.doorState = CLOSE;
             TM.motorDirection = DIRN_STOP;
             elevio_motorDirection(DIRN_STOP);
@@ -135,7 +141,7 @@ void executeOrder () {
     
     if (TM.lastMovingDirection == DIRN_STOP){
         if (nextProjectedFloor()==TM.floorState) {
-            printf("Hola");
+            printf("lastMovingDirection = stop");
             doorOpen();
         }
 
@@ -181,46 +187,6 @@ void executeOrder () {
         doorOpen();
     }
 
-    
-    /*
-
-    if (sign(nextProjectedFloor()-TM.floorState)>0){
-        TM.motorDirection = DIRN_UP;
-        elevio_motorDirection(TM.motorDirection);
-    }
-
-    else if (sign(nextProjectedFloor()-TM.floorState) < 0 && nextProjectedFloor() != -1){
-        TM.motorDirection = DIRN_DOWN;
-        elevio_motorDirection(TM.motorDirection);
-    }
-
-    else if (nextProjectedFloor() == -1){
-        TM.motorDirection = DIRN_STOP;
-        elevio_motorDirection(DIRN_STOP);
-        cleanFloor();
-        
-    }
-        */
-   
-    /*
-    if (TM.motorDirection == DIRN_STOP) {
-        
-    
-                if (nextFloor()<TM.floorState ) {
-                        TM.motorDirection = DIRN_DOWN;
-                        elevio_motorDirection(DIRN_DOWN);
-                }  
-                else if (nextFloor() > TM.floorState && nextFloor() != 10000) {
-                    elevio_motorDirection(DIRN_UP);
-                    TM.motorDirection = DIRN_UP;     
-                }    
-                             
-    }
-
-
-    // if motorDir == opp && ordersInSameDir == TM.stateFloor
-    */
-
 
 };
 
@@ -236,7 +202,7 @@ int ordersInQueue(){
 }
 
 void doorOpen(){
-    printf("hei\n");
+    printf("door open funksjon aktiv \n");
     elevio_motorDirection(DIRN_STOP);
     TM .motorDirection = DIRN_STOP;
     cleanFloor();
@@ -245,30 +211,33 @@ void doorOpen(){
     timer();
     TM.doorState = CLOSE;
     elevio_doorOpenLamp(OFF); 
+    printf("door open funksjon ferdig\n");
 };
 
 void timer_3s(){
-  
+    printf("timer_3s funksjon aktiv \n");
     struct timespec start, now;
     clock_gettime(CLOCK_MONOTONIC, &start);
     do {
         clock_gettime(CLOCK_MONOTONIC, &now);
-        buttonPushed();
+        if (TM.stopButton== OFF)
+        {buttonPushed();}
+        stateRefresh();
     } while ((now.tv_sec - start.tv_sec) < 3);
-   
+    printf("timer_3s funksjon ferdig \n");
 }
 void timer(){
-  
+    printf("timer funksjon aktiv \n");
     struct timespec start, now;
     clock_gettime(CLOCK_MONOTONIC, &start);
     do {
         clock_gettime(CLOCK_MONOTONIC, &now);
-        buttonPushed();
-        stateRefresh();
+        if (TM.stopButton == OFF){buttonPushed();}
     } while ((now.tv_sec - start.tv_sec) < 3 || TM.stopButton && elevio_floorSensor()!=-1 || TM.obstruction && TM.doorState) ;
    if (now.tv_sec - start.tv_sec > 3.5) {
     timer_3s();
    }
+   printf("timer funksjon ferdig \n");
 }
 
 
