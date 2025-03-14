@@ -236,6 +236,9 @@ int ordersInQueue(){
 }
 
 void doorOpen(){
+    if (elevio_floorSensor()==-1 ){
+        return;
+    }
     printf("hei\n");
     elevio_motorDirection(DIRN_STOP);
     TM .motorDirection = DIRN_STOP;
