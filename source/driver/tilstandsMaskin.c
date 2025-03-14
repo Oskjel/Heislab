@@ -132,6 +132,14 @@ void executeOrder () {
     
     // if Motordir == Stop
     // Gå til hva som helst
+    if (TM.lastMovingDirection == DIRN_STOP && elevio_floorSensor()==-1){
+        while(elevio_floorSensor()==-1) {
+            elevio_motorDirection(DIRN_DOWN);
+            
+        }
+        elevio_motorDirection(DIRN_STOP);
+        return;
+    }
     
     if (TM.lastMovingDirection == DIRN_STOP){
         if (nextProjectedFloor()==TM.floorState) {
@@ -180,46 +188,6 @@ void executeOrder () {
     else if ((elevio_floorSensor()!=-1 || TM.projectedFloor == TM.floorState)) {
         doorOpen();
     }
-
-    
-    /*
-
-    if (sign(nextProjectedFloor()-TM.floorState)>0){
-        TM.motorDirection = DIRN_UP;
-        elevio_motorDirection(TM.motorDirection);
-    }
-
-    else if (sign(nextProjectedFloor()-TM.floorState) < 0 && nextProjectedFloor() != -1){
-        TM.motorDirection = DIRN_DOWN;
-        elevio_motorDirection(TM.motorDirection);
-    }
-
-    else if (nextProjectedFloor() == -1){
-        TM.motorDirection = DIRN_STOP;
-        elevio_motorDirection(DIRN_STOP);
-        cleanFloor();
-        
-    }
-        */
-   
-    /*
-    if (TM.motorDirection == DIRN_STOP) {
-        
-    
-                if (nextFloor()<TM.floorState ) {
-                        TM.motorDirection = DIRN_DOWN;
-                        elevio_motorDirection(DIRN_DOWN);
-                }  
-                else if (nextFloor() > TM.floorState && nextFloor() != 10000) {
-                    elevio_motorDirection(DIRN_UP);
-                    TM.motorDirection = DIRN_UP;     
-                }    
-                             
-    }
-
-
-    // if motorDir == opp && ordersInSameDir == TM.stateFloor
-    */
 
 
 };
